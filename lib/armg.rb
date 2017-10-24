@@ -14,9 +14,18 @@ ActiveSupport.on_load(:active_record) do
   require 'armg/table_definition_ext'
   require 'armg/armg'
 
-  ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter::NATIVE_DATABASE_TYPES[:geometry] = { name: 'geometry' }
+  # Define Geometry Types
+  geom_types = %i[geometry point line_string polygon multi_point multi_line_string multi_polygon geometry_collection]
+  geom_types.each do |g|
+    ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter::NATIVE_DATABASE_TYPES[g] = { name: g.to_s }
+  end
+
   ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.prepend(Armg::AbstractMysqlAdapterExt)
-  ActiveRecord::Type.register(:geometry, Armg::MysqlGeometry, adapter: :mysql2)
+  # Register Types
+  geom_types.each do |g|
+    ActiveRecord::Type.register(g, Armg::MysqlGeometry, adapter: :mysql2)
+  end
+
   ActiveRecord::ConnectionAdapters::MySQL::TableDefinition.prepend(Armg::TableDefinitionExt)
   ActiveRecord::ConnectionAdapters::MySQL::Table.prepend(Armg::TableDefinitionExt)
 end
