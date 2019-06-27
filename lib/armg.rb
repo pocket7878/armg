@@ -17,12 +17,13 @@ ActiveSupport.on_load(:active_record) do
   # Define Geometry Types
   geom_types = %i[geometry point line_string polygon multi_point multi_line_string multi_polygon geometry_collection]
   geom_types.each do |g|
-    ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter::NATIVE_DATABASE_TYPES[g] = { name: g.to_s }
+    ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter::NATIVE_DATABASE_TYPES[g] = {name: g.to_s}
   end
 
   ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.prepend(Armg::AbstractMysqlAdapterExt)
   # Register Types
   geom_types.each do |g|
+    gname = g.to_s.self.split("_").map {|w| w[0] = w[0].upcase; w}.join
     ActiveRecord::Type.register(g, Armg::MysqlGeometry, adapter: :mysql2)
   end
 
